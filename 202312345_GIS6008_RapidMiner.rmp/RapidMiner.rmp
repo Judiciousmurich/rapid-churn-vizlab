@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<process version="9.10.0">
+  <context>
+    <input/>
+    <output/>
+  </context>
+  <operator activated="true" class="process" compatibility="9.10.0" expanded="true" height="757" name="Process" width="906" x="61" y="31">
+    <process expanded="true">
+      
+      <!-- Read CSV -->
+      <operator activated="true" class="read_csv" compatibility="9.10.0" expanded="true" height="60" name="Read CSV" width="90" x="25" y="25">
+        <parameter key="file" value="customer_churn_data.csv"/>
+        <parameter key="header" value="true"/>
+        <parameter key="quote_character" value="\""/>
+        <parameter key="column_separators" value=","/>
+      </operator>
+      
+      <!-- Replace Missing Values -->
+      <operator activated="true" class="replace_missing_values" compatibility="9.10.0" expanded="true" height="60" name="Replace Missing Values" width="120" x="160" y="25">
+      </operator>
+      
+      <!-- Nominal to Numerical (if needed) -->
+      <operator activated="true" class="nominal_to_numerical" compatibility="9.10.0" expanded="true" height="60" name="Nominal to Numerical" width="130" x="320" y="25">
+      </operator>
+      
+      <!-- Split Data -->
+      <operator activated="true" class="split_data" compatibility="9.10.0" expanded="true" height="60" name="Split Data" width="90" x="480" y="25">
+        <parameter key="sampling_type" value="random"/>
+        <parameter key="partition_ratio" value="0.7"/>
+      </operator>
+      
+      <!-- Decision Tree Model Training -->
+      <operator activated="true" class="decision_tree" compatibility="9.10.0" expanded="true" height="60" name="Decision Tree" width="100" x="650" y="0">
+        <parameter key="criterion" value="gain_ratio"/>
+        <parameter key="max_depth" value="20"/>
+      </operator>
+      
+      <!-- Apply Model -->
+      <operator activated="true" class="apply_model" compatibility="9.10.0" expanded="true" height="60" name="Apply Model" width="90" x="650" y="80"/>
+      
+      <!-- Performance (Accuracy, ROC, Confusion Matrix) -->
+      <operator activated="true" class="performance" compatibility="9.10.0" expanded="true" height="60" name="Performance" width="90" x="820" y="40"/>
+      
+      <!-- Connectors -->
+      <connect from_op="Read CSV" from_port="output" to_op="Replace Missing Values" to_port="example set input"/>
+      <connect from_op="Replace Missing Values" from_port="example set output" to_op="Nominal to Numerical" to_port="example set input"/>
+      <connect from_op="Nominal to Numerical" from_port="example set output" to_op="Split Data" to_port="example set input"/>
+      
+      <connect from_op="Split Data" from_port="training set" to_op="Decision Tree" to_port="training set"/>
+      <connect from_op="Split Data" from_port="test set" to_op="Apply Model" to_port="unlabelled data"/>
+      <connect from_op="Decision Tree" from_port="model" to_op="Apply Model" to_port="model"/>
+      <connect from_op="Apply Model" from_port="labelled data" to_op="Performance" to_port="labelled data"/>
+      
+      <connect from_op="Performance" from_port="performance" to_port="output"/>
+    </process>
+  </operator>
+</process>
